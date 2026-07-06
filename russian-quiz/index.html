@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Russian Alphabet Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 500px;
+      padding: 20px;
+    }
+
+    /* ── START SCREEN ── */
+    #start-screen {
+      text-align: center;
+    }
+    #start-screen h1 {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      color: #e94560;
+    }
+    #start-screen p {
+      color: #aaa;
+      margin-bottom: 32px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    #start-screen button {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform .1s, background .2s;
+    }
+    #start-screen button:hover { background: #c73652; transform: scale(1.03); }
+
+    /* ── GAME SCREEN ── */
+    #game-screen { display: none; }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .score-label { font-size: 1rem; color: #eee; font-weight: bold; }
+
+    .timer-bar-wrap {
+      background: #2a2a3e;
+      border-radius: 4px;
+      height: 8px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    #timer-bar {
+      height: 100%;
+      width: 100%;
+      background: #e94560;
+      transition: width 0.1s linear, background 0.3s;
+    }
+
+    .letter-card {
+      background: #16213e;
+      border-radius: 16px;
+      text-align: center;
+      padding: 40px 20px;
+      margin-bottom: 24px;
+    }
+    #letter-display {
+      font-size: 8rem;
+      line-height: 1;
+      color: #fff;
+      user-select: none;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .choice-btn {
+      background: #0f3460;
+      color: #eee;
+      border: 2px solid transparent;
+      padding: 16px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, transform .1s;
+      font-family: inherit;
+    }
+    .choice-btn:hover:not(:disabled) {
+      background: #1a4a80;
+      transform: scale(1.02);
+    }
+    .choice-btn.correct {
+      background: #1a5c3a;
+      border-color: #2ecc71;
+      color: #2ecc71;
+    }
+    .choice-btn.wrong {
+      background: #5c1a1a;
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+    .choice-btn:disabled { cursor: default; transform: none; }
+
+    /* ── RESULTS SCREEN ── */
+    #results-screen {
+      display: none;
+      text-align: center;
+    }
+    #results-screen h2 {
+      font-size: 2rem;
+      color: #e94560;
+      margin-bottom: 8px;
+    }
+    .big-score {
+      font-size: 4rem;
+      font-weight: bold;
+      margin: 16px 0;
+    }
+    .stat { color: #aaa; margin-bottom: 8px; font-size: 1rem; }
+
+    .missed-list {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .missed-list h3 { color: #aaa; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .missed-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .missed-letter { font-size: 1.8rem; width: 40px; }
+    .missed-detail { color: #aaa; font-size: 0.9rem; }
+    .missed-detail strong { color: #eee; }
+
+    #results-screen button {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform .1s, background .2s;
+      margin-top: 8px;
+    }
+    #results-screen button:hover { background: #c73652; transform: scale(1.03); }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START -->
+  <div id="start-screen">
+    <h1>Русский алфавит</h1>
+    <p>Match each letter to the sound it makes.<br>You have <strong>5 seconds</strong> per question.<br>10 questions per round.</p>
+    <button onclick="startGame()">Start Quiz</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="game-screen">
+    <div class="top-bar">
+      <span id="q-counter">Q 1 / 10</span>
+      <span class="score-label">Score: <span id="score-display">0</span></span>
+    </div>
+    <div class="timer-bar-wrap">
+      <div id="timer-bar"></div>
+    </div>
+    <div class="letter-card">
+      <div id="letter-display">А</div>
+    </div>
+    <div class="choices" id="choices"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-screen">
+    <h2>Round complete!</h2>
+    <div class="big-score" id="final-score">0 / 10</div>
+    <div class="stat" id="time-stat"></div>
+    <div class="missed-list" id="missed-section" style="display:none">
+      <h3>Ones to remember</h3>
+      <div id="missed-items"></div>
+    </div>
+    <button onclick="startGame()">Play again</button>
+  </div>
+
+</div>
+
+<script>
+const LETTERS = [
+  { letter: "А", sound: "a" },
+  { letter: "Б", sound: "b" },
+  { letter: "В", sound: "v" },
+  { letter: "Г", sound: "g" },
+  { letter: "Д", sound: "d" },
+  { letter: "Е", sound: "ye" },
+  { letter: "Ё", sound: "yo" },
+  { letter: "Ж", sound: "zh" },
+  { letter: "З", sound: "z" },
+  { letter: "И", sound: "ee" },
+  { letter: "Й", sound: "y (short)" },
+  { letter: "К", sound: "k" },
+  { letter: "Л", sound: "l" },
+  { letter: "М", sound: "m" },
+  { letter: "Н", sound: "n" },
+  { letter: "О", sound: "o" },
+  { letter: "П", sound: "p" },
+  { letter: "Р", sound: "r" },
+  { letter: "С", sound: "s" },
+  { letter: "Т", sound: "t" },
+  { letter: "У", sound: "oo" },
+  { letter: "Ф", sound: "f" },
+  { letter: "Х", sound: "kh" },
+  { letter: "Ц", sound: "ts" },
+  { letter: "Ч", sound: "ch" },
+  { letter: "Ш", sound: "sh" },
+  { letter: "Щ", sound: "shch" },
+  { letter: "Ъ", sound: "hard sign" },
+  { letter: "Ы", sound: "ih" },
+  { letter: "Ь", sound: "soft sign" },
+  { letter: "Э", sound: "e" },
+  { letter: "Ю", sound: "yu" },
+  { letter: "Я", sound: "ya" },
+];
+
+const TOTAL_Q = 10;
+const TIME_PER_Q = 5000; // ms
+
+let questions = [];
+let current = 0;
+let score = 0;
+let missed = [];
+let timerInterval = null;
+let timeLeft = 0;
+let startTime = 0;
+let answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  questions = shuffle(LETTERS).slice(0, TOTAL_Q);
+  current = 0;
+  score = 0;
+  missed = [];
+  startTime = performance.now();
+
+  show('game-screen');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  if (current >= TOTAL_Q) { showResults(); return; }
+
+  answered = false;
+  const q = questions[current];
+
+  document.getElementById('q-counter').textContent = `Q ${current + 1} / ${TOTAL_Q}`;
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('letter-display').textContent = q.letter;
+
+  // Build 4 choices: correct + 3 random wrong
+  const others = shuffle(LETTERS.filter(l => l.sound !== q.sound)).slice(0, 3);
+  const choices = shuffle([q, ...others]);
+
+  const container = document.getElementById('choices');
+  container.innerHTML = '';
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.sound;
+    btn.onclick = () => handleChoice(btn, c.sound === q.sound, q);
+    container.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = TIME_PER_Q;
+  updateBar(1);
+
+  timerInterval = setInterval(() => {
+    timeLeft -= 100;
+    const ratio = timeLeft / TIME_PER_Q;
+    updateBar(ratio);
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) timeout();
+    }
+  }, 100);
+}
+
+function updateBar(ratio) {
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = (ratio * 100) + '%';
+  bar.style.background = ratio > 0.4 ? '#e94560' : '#e67e22';
+}
+
+function timeout() {
+  answered = true;
+  const q = questions[current];
+  missed.push({ letter: q.letter, correct: q.sound, given: '(no answer)' });
+  // Highlight correct answer
+  document.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === q.sound) btn.classList.add('correct');
+  });
+  setTimeout(next, 900);
+}
+
+function handleChoice(btn, isCorrect, q) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('score-display').textContent = score;
+  } else {
+    btn.classList.add('wrong');
+    missed.push({ letter: q.letter, correct: q.sound, given: btn.textContent });
+    // Show correct one
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === q.sound) b.classList.add('correct');
+    });
+  }
+
+  setTimeout(next, 900);
+}
+
+function next() {
+  current++;
+  loadQuestion();
+}
+
+function showResults() {
+  show('results-screen');
+
+  const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+  document.getElementById('final-score').textContent = `${score} / ${TOTAL_Q}`;
+  document.getElementById('time-stat').textContent = `Time: ${elapsed}s`;
+
+  const missedSection = document.getElementById('missed-section');
+  const missedItems = document.getElementById('missed-items');
+  missedItems.innerHTML = '';
+
+  if (missed.length > 0) {
+    missedSection.style.display = 'block';
+    missed.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'missed-item';
+      div.innerHTML = `
+        <span class="missed-letter">${m.letter}</span>
+        <span class="missed-detail">
+          Correct: <strong>${m.correct}</strong>
+          ${m.given !== '(no answer)' ? `— you said: <strong>${m.given}</strong>` : '— (timed out)'}
+        </span>`;
+      missedItems.appendChild(div);
+    });
+  } else {
+    missedSection.style.display = 'none';
+  }
+}
+
+function show(id) {
+  ['start-screen', 'game-screen', 'results-screen'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+</script>
+</body>
+</html>

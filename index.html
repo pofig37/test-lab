@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Lab</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #e94560;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: #888;
+      margin-bottom: 40px;
+      font-size: 0.95rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+    }
+    .card {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .15s, background .15s;
+      display: block;
+    }
+    .card:hover {
+      background: #1e2d50;
+      transform: translateY(-3px);
+    }
+    .card-icon { font-size: 2.2rem; margin-bottom: 12px; }
+    .card h2 { font-size: 1.1rem; margin-bottom: 6px; }
+    .card p { color: #888; font-size: 0.85rem; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Lab</h1>
+  <p class="subtitle">Alex's staging area — projects in progress</p>
+  <div class="grid">
+    <a class="card" href="russian-quiz/">
+      <div class="card-icon">🇷🇺</div>
+      <h2>Russian Alphabet Quiz</h2>
+      <p>Match Cyrillic letters to their sounds. Timed rounds, 10 questions.</p>
+    </a>
+  </div>
+</body>
+</html>
