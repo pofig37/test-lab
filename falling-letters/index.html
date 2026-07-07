@@ -6,51 +6,71 @@
   <title>Falling Letters</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #1a1a2e; display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
-    canvas { display: block; touch-action: none; }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
     #ui {
       width: 100%;
-      max-width: 400px;
-      padding: 10px 16px;
+      max-width: 440px;
+      padding: 8px 16px;
       display: flex;
       justify-content: space-between;
       color: #eee;
-      font-size: 1rem;
+      font-size: 0.95rem;
+      flex-shrink: 0;
     }
     #ui span strong { color: #e94560; }
-    #input-row {
+
+    #canvas-container { flex-shrink: 0; }
+
+    #sound-grid {
       width: 100%;
-      max-width: 400px;
-      padding: 8px 16px;
+      max-width: 440px;
+      padding: 8px 10px;
       display: flex;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    #answer {
-      flex: 1;
-      padding: 12px 16px;
-      font-size: 1.2rem;
+    .sound-btn {
       background: #0f3460;
+      color: #dde;
       border: 2px solid #1a4a80;
       border-radius: 8px;
-      color: #fff;
-      outline: none;
+      padding: 8px 0;
+      width: calc(16.66% - 6px);
+      min-width: 48px;
+      font-size: 0.85rem;
       font-family: inherit;
-    }
-    #answer:focus { border-color: #e94560; }
-    #submit {
-      padding: 12px 20px;
-      background: #e94560;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
       cursor: pointer;
+      transition: background .1s, border-color .1s, transform .08s;
+      touch-action: manipulation;
     }
+    .sound-btn:active { transform: scale(0.93); }
+    .sound-btn.hit {
+      background: #1a5c3a;
+      border-color: #2ecc71;
+      color: #2ecc71;
+    }
+    .sound-btn.miss {
+      background: #5c1a1a;
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+
     #game-over {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(26,26,46,0.93);
+      background: rgba(26,26,46,0.95);
       align-items: center;
       justify-content: center;
       flex-direction: column;
@@ -68,16 +88,16 @@
   </style>
 </head>
 <body>
+
   <div id="ui">
     <span>Score: <strong id="score">0</strong></span>
     <span>Lives: <strong id="lives">❤️❤️❤️</strong></span>
     <span>Level: <strong id="level">1</strong></span>
   </div>
+
   <div id="canvas-container"></div>
-  <div id="input-row">
-    <input id="answer" type="text" placeholder="type the sound..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
-    <button id="submit">→</button>
-  </div>
+
+  <div id="sound-grid"></div>
 
   <div id="game-over">
     <h2>Game Over</h2>
@@ -88,20 +108,23 @@
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
   <script>
   const LETTERS = [
-    { letter: "А", sound: "a" }, { letter: "Б", sound: "b" },
-    { letter: "В", sound: "v" }, { letter: "Г", sound: "g" },
-    { letter: "Д", sound: "d" }, { letter: "Е", sound: "ye" },
-    { letter: "Ж", sound: "zh" }, { letter: "З", sound: "z" },
-    { letter: "И", sound: "ee" }, { letter: "К", sound: "k" },
-    { letter: "Л", sound: "l" }, { letter: "М", sound: "m" },
-    { letter: "Н", sound: "n" }, { letter: "О", sound: "o" },
-    { letter: "П", sound: "p" }, { letter: "Р", sound: "r" },
-    { letter: "С", sound: "s" }, { letter: "Т", sound: "t" },
-    { letter: "У", sound: "oo" }, { letter: "Ф", sound: "f" },
-    { letter: "Х", sound: "kh" }, { letter: "Ч", sound: "ch" },
-    { letter: "Ш", sound: "sh" }, { letter: "Э", sound: "e" },
-    { letter: "Ю", sound: "yu" }, { letter: "Я", sound: "ya" },
+    { letter: "А", sound: "a" },   { letter: "Б", sound: "b" },
+    { letter: "В", sound: "v" },   { letter: "Г", sound: "g" },
+    { letter: "Д", sound: "d" },   { letter: "Е", sound: "ye" },
+    { letter: "Ж", sound: "zh" },  { letter: "З", sound: "z" },
+    { letter: "И", sound: "ee" },  { letter: "К", sound: "k" },
+    { letter: "Л", sound: "l" },   { letter: "М", sound: "m" },
+    { letter: "Н", sound: "n" },   { letter: "О", sound: "o" },
+    { letter: "П", sound: "p" },   { letter: "Р", sound: "r" },
+    { letter: "С", sound: "s" },   { letter: "Т", sound: "t" },
+    { letter: "У", sound: "oo" },  { letter: "Ф", sound: "f" },
+    { letter: "Х", sound: "kh" },  { letter: "Ч", sound: "ch" },
+    { letter: "Ш", sound: "sh" },  { letter: "Э", sound: "e" },
+    { letter: "Ю", sound: "yu" },  { letter: "Я", sound: "ya" },
   ];
+
+  // Build sorted sound button list once
+  const ALL_SOUNDS = LETTERS.map(l => l.sound).sort();
 
   let fallingLetters = [];
   let score = 0;
@@ -110,31 +133,67 @@
   let frameCount = 0;
   let gameActive = true;
 
-  function spawnInterval() { return Math.max(60, 130 - level * 10); }
-  function fallSpeed() { return 0.8 + level * 0.3; }
+  // Build sound buttons
+  const grid = document.getElementById('sound-grid');
+  ALL_SOUNDS.forEach(sound => {
+    const btn = document.createElement('button');
+    btn.className = 'sound-btn';
+    btn.textContent = sound;
+    btn.addEventListener('click', () => handleTap(sound, btn));
+    grid.appendChild(btn);
+  });
+
+  function handleTap(sound, btn) {
+    if (!gameActive) return;
+    let hit = false;
+    // Find lowest matching letter
+    let lowestIdx = -1;
+    let lowestY = -Infinity;
+    for (let i = 0; i < fallingLetters.length; i++) {
+      if (fallingLetters[i].sound === sound && fallingLetters[i].y > lowestY) {
+        lowestY = fallingLetters[i].y;
+        lowestIdx = i;
+      }
+    }
+    if (lowestIdx >= 0) {
+      fallingLetters[lowestIdx].flash = 20;
+      const removed = fallingLetters[lowestIdx];
+      setTimeout(() => {
+        const idx = fallingLetters.indexOf(removed);
+        if (idx >= 0) fallingLetters.splice(idx, 1);
+      }, 200);
+      score++;
+      document.getElementById('score').textContent = score;
+      hit = true;
+    }
+
+    // Flash button
+    btn.classList.add(hit ? 'hit' : 'miss');
+    setTimeout(() => btn.classList.remove('hit', 'miss'), 300);
+  }
+
+  function spawnInterval() { return Math.max(55, 120 - level * 8); }
+  function fallSpeed() { return 0.6 + level * 0.25; }
 
   function spawnLetter(p) {
     const data = LETTERS[Math.floor(Math.random() * LETTERS.length)];
     fallingLetters.push({
       letter: data.letter,
       sound: data.sound,
-      x: 30 + Math.random() * (p.width - 60),
+      x: 32 + Math.random() * (p.width - 64),
       y: -30,
       speed: fallSpeed(),
       flash: 0,
     });
   }
 
-  function getCanvas() {
-    const w = Math.min(window.innerWidth, 400);
-    const h = Math.min(window.innerHeight - 140, 520);
-    return { w, h };
-  }
-
   new p5(function(p) {
     p.setup = function() {
-      const { w, h } = getCanvas();
-      const cnv = p.createCanvas(w, h);
+      const uiH = document.getElementById('ui').offsetHeight;
+      const gridH = document.getElementById('sound-grid').offsetHeight;
+      const w = Math.min(window.innerWidth, 440);
+      const h = window.innerHeight - uiH - gridH - 16;
+      const cnv = p.createCanvas(w, Math.max(h, 200));
       cnv.parent('canvas-container');
       p.textAlign(p.CENTER, p.CENTER);
       p.noStroke();
@@ -144,38 +203,28 @@
       if (!gameActive) return;
       p.background(26, 26, 46);
       frameCount++;
-
       if (frameCount % spawnInterval() === 0) spawnLetter(p);
 
       for (let i = fallingLetters.length - 1; i >= 0; i--) {
         const fl = fallingLetters[i];
         fl.y += fl.speed;
 
-        // Flash effect on correct answer
         if (fl.flash > 0) {
-          p.fill(46, 204, 113, fl.flash * 4);
-          p.ellipse(fl.x, fl.y, 70, 70);
-          fl.flash -= 5;
+          p.fill(46, 204, 113, fl.flash * 8);
+          p.ellipse(fl.x, fl.y, 66, 66);
+          fl.flash -= 4;
         }
 
-        // Draw letter
         p.fill(fl.flash > 0 ? p.color(46, 204, 113) : p.color(255));
-        p.textSize(50);
+        p.textSize(48);
         p.text(fl.letter, fl.x, fl.y);
 
-        // Draw sound hint faintly below
-        p.fill(100, 120, 180, 160);
-        p.textSize(14);
-        p.text(fl.sound, fl.x, fl.y + 34);
-
-        // Reached bottom
         if (fl.y > p.height + 30) {
           fallingLetters.splice(i, 1);
           loseLife();
         }
       }
 
-      // Level up every 10 points
       const newLevel = Math.floor(score / 10) + 1;
       if (newLevel !== level) {
         level = newLevel;
@@ -184,40 +233,17 @@
     };
   });
 
-  function checkAnswer() {
-    if (!gameActive) return;
-    const input = document.getElementById('answer');
-    const typed = input.value.trim().toLowerCase();
-    if (!typed) return;
-
-    let hit = false;
-    for (let i = fallingLetters.length - 1; i >= 0; i--) {
-      if (fallingLetters[i].sound === typed) {
-        fallingLetters[i].flash = 25;
-        setTimeout(() => fallingLetters.splice(fallingLetters.indexOf(fallingLetters[i]), 1), 250);
-        score++;
-        document.getElementById('score').textContent = score;
-        hit = true;
-        break;
-      }
-    }
-    input.value = '';
-    if (!hit) {
-      input.style.borderColor = '#e74c3c';
-      setTimeout(() => input.style.borderColor = '#1a4a80', 300);
-    }
-  }
-
   function loseLife() {
     lives--;
-    const hearts = ['❤️'.repeat(lives), '🖤'.repeat(3 - lives)].join('');
-    document.getElementById('lives').textContent = hearts || '💔';
+    document.getElementById('lives').textContent =
+      '❤️'.repeat(lives) + '🖤'.repeat(3 - lives) || '💔';
     if (lives <= 0) endGame();
   }
 
   function endGame() {
     gameActive = false;
-    document.getElementById('go-score').textContent = `You scored ${score} point${score !== 1 ? 's' : ''}`;
+    document.getElementById('go-score').textContent =
+      `You scored ${score} point${score !== 1 ? 's' : ''}`;
     document.getElementById('game-over').classList.add('show');
   }
 
@@ -230,10 +256,10 @@
     document.getElementById('game-over').classList.remove('show');
   }
 
-  document.getElementById('answer').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkAnswer();
+  // Keep keyboard support for desktop
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') return;
   });
-  document.getElementById('submit').addEventListener('click', checkAnswer);
   </script>
 </body>
 </html>
