@@ -39,6 +39,8 @@
       gap: 6px;
       justify-content: center;
       flex-shrink: 0;
+      overflow-y: auto;
+      max-height: 160px;
     }
     .sound-btn {
       background: #0f3460;
@@ -108,19 +110,23 @@
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
   <script>
   const LETTERS = [
-    { letter: "А", sound: "a" },   { letter: "Б", sound: "b" },
-    { letter: "В", sound: "v" },   { letter: "Г", sound: "g" },
-    { letter: "Д", sound: "d" },   { letter: "Е", sound: "ye" },
-    { letter: "Ж", sound: "zh" },  { letter: "З", sound: "z" },
-    { letter: "И", sound: "ee" },  { letter: "К", sound: "k" },
-    { letter: "Л", sound: "l" },   { letter: "М", sound: "m" },
-    { letter: "Н", sound: "n" },   { letter: "О", sound: "o" },
-    { letter: "П", sound: "p" },   { letter: "Р", sound: "r" },
-    { letter: "С", sound: "s" },   { letter: "Т", sound: "t" },
-    { letter: "У", sound: "oo" },  { letter: "Ф", sound: "f" },
-    { letter: "Х", sound: "kh" },  { letter: "Ч", sound: "ch" },
-    { letter: "Ш", sound: "sh" },  { letter: "Э", sound: "e" },
-    { letter: "Ю", sound: "yu" },  { letter: "Я", sound: "ya" },
+    { letter: "А", sound: "a" },      { letter: "Б", sound: "b" },
+    { letter: "В", sound: "v" },      { letter: "Г", sound: "g" },
+    { letter: "Д", sound: "d" },      { letter: "Е", sound: "ye" },
+    { letter: "Ё", sound: "yo" },     { letter: "Ж", sound: "zh" },
+    { letter: "З", sound: "z" },      { letter: "И", sound: "ee" },
+    { letter: "Й", sound: "y" },      { letter: "К", sound: "k" },
+    { letter: "Л", sound: "l" },      { letter: "М", sound: "m" },
+    { letter: "Н", sound: "n" },      { letter: "О", sound: "o" },
+    { letter: "П", sound: "p" },      { letter: "Р", sound: "r" },
+    { letter: "С", sound: "s" },      { letter: "Т", sound: "t" },
+    { letter: "У", sound: "oo" },     { letter: "Ф", sound: "f" },
+    { letter: "Х", sound: "kh" },     { letter: "Ц", sound: "ts" },
+    { letter: "Ч", sound: "ch" },     { letter: "Ш", sound: "sh" },
+    { letter: "Щ", sound: "shch" },   { letter: "Ъ", sound: "ъ" },
+    { letter: "Ы", sound: "ih" },     { letter: "Ь", sound: "ь" },
+    { letter: "Э", sound: "e" },      { letter: "Ю", sound: "yu" },
+    { letter: "Я", sound: "ya" },
   ];
 
   // Build sorted sound button list once
