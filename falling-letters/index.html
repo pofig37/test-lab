@@ -73,7 +73,7 @@
     <span>Lives: <strong id="lives">❤️❤️❤️</strong></span>
     <span>Level: <strong id="level">1</strong></span>
   </div>
-  <canvas id="canvas"></canvas>
+  <div id="canvas-container"></div>
   <div id="input-row">
     <input id="answer" type="text" placeholder="type the sound..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
     <button id="submit">→</button>
@@ -135,7 +135,7 @@
     p.setup = function() {
       const { w, h } = getCanvas();
       const cnv = p.createCanvas(w, h);
-      cnv.parent('canvas');
+      cnv.parent('canvas-container');
       p.textAlign(p.CENTER, p.CENTER);
       p.noStroke();
     };
