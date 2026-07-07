@@ -28,29 +28,34 @@
     }
     #ui span strong { color: #e94560; }
 
-    #canvas-container { flex-shrink: 0; }
+    #canvas-container {
+      flex: 1;
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+    }
 
     #sound-grid {
       width: 100%;
       max-width: 440px;
-      padding: 8px 10px;
+      padding: 6px 8px;
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
       justify-content: center;
       flex-shrink: 0;
+      height: 152px;
       overflow-y: auto;
-      max-height: 160px;
     }
     .sound-btn {
       background: #0f3460;
       color: #dde;
       border: 2px solid #1a4a80;
-      border-radius: 8px;
-      padding: 8px 0;
-      width: calc(16.66% - 6px);
-      min-width: 48px;
-      font-size: 0.85rem;
+      border-radius: 7px;
+      padding: 6px 0;
+      width: calc(14.28% - 5px);
+      min-width: 44px;
+      font-size: 0.8rem;
       font-family: inherit;
       cursor: pointer;
       transition: background .1s, border-color .1s, transform .08s;
@@ -195,11 +200,9 @@
 
   new p5(function(p) {
     p.setup = function() {
-      const uiH = document.getElementById('ui').offsetHeight;
-      const gridH = document.getElementById('sound-grid').offsetHeight;
-      const w = Math.min(window.innerWidth, 440);
-      const h = window.innerHeight - uiH - gridH - 16;
-      const cnv = p.createCanvas(w, Math.max(h, 200));
+      const container = document.getElementById('canvas-container');
+      const rect = container.getBoundingClientRect();
+      const cnv = p.createCanvas(rect.width, Math.max(rect.height, 150));
       cnv.parent('canvas-container');
       p.textAlign(p.CENTER, p.CENTER);
       p.noStroke();
