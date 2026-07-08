@@ -34,22 +34,22 @@
     #canvas-container {
       width: 100%;
       max-width: 440px;
-      height: calc(100dvh - 36px - 172px);
+      height: calc(100dvh - 36px - 214px);
       flex-shrink: 0;
       overflow: hidden;
     }
 
-    /* Grid: fixed 172px, scrolls if rows overflow */
+    /* Grid: fixed 214px = 7 rows of ~28px + gaps + padding */
     #sound-grid {
       width: 100%;
       max-width: 440px;
-      padding: 5px 8px 8px;
+      padding: 5px 8px 6px;
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 4px;
       align-content: flex-start;
-      height: 172px;
-      overflow-y: auto;
+      height: 214px;
+      overflow: hidden;
       flex-shrink: 0;
     }
 
@@ -57,12 +57,11 @@
       background: #0f3460;
       color: #dde;
       border: 2px solid #1a4a80;
-      border-radius: 7px;
-      padding: 5px 0;
-      /* 6 per row */
-      width: calc(16.66% - 5px);
-      min-width: 42px;
-      font-size: 0.78rem;
+      border-radius: 6px;
+      padding: 4px 0;
+      /* 5 per row */
+      width: calc(20% - 4px);
+      font-size: 0.8rem;
       font-family: inherit;
       cursor: pointer;
       touch-action: manipulation;
@@ -198,7 +197,7 @@
     p.setup = function() {
       const container = document.getElementById('canvas-container');
       const w = container.clientWidth || Math.min(window.innerWidth, 440);
-      const h = container.clientHeight || Math.max(150, window.innerHeight - 36 - 172);
+      const h = container.clientHeight || Math.max(150, window.innerHeight - 36 - 214);
       const cnv = p.createCanvas(w, h);
       cnv.parent('canvas-container');
       p.textAlign(p.CENTER, p.CENTER);
