@@ -34,21 +34,20 @@
     #canvas-container {
       width: 100%;
       max-width: 440px;
-      height: calc(100dvh - 36px - 214px);
+      height: calc(100dvh - 36px - 250px);
       flex-shrink: 0;
       overflow: hidden;
     }
 
-    /* Grid: fixed 214px = 7 rows of ~28px + gaps + padding */
+    /* Grid: CSS grid guarantees exactly 5 columns regardless of viewport */
     #sound-grid {
       width: 100%;
       max-width: 440px;
       padding: 5px 8px 6px;
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
       gap: 4px;
-      align-content: flex-start;
-      height: 214px;
+      height: 250px;
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -59,8 +58,6 @@
       border: 2px solid #1a4a80;
       border-radius: 6px;
       padding: 4px 0;
-      /* 5 per row */
-      width: calc(20% - 4px);
       font-size: 0.8rem;
       font-family: inherit;
       cursor: pointer;
