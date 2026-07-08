@@ -6,6 +6,7 @@
   <title>Falling Letters</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       background: #1a1a2e;
       display: flex;
@@ -19,49 +20,55 @@
     #ui {
       width: 100%;
       max-width: 440px;
-      padding: 8px 16px;
+      padding: 7px 16px;
       display: flex;
       justify-content: space-between;
       color: #eee;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      height: 36px;
       flex-shrink: 0;
     }
     #ui span strong { color: #e94560; }
 
+    /* Canvas gets all space between UI and grid */
     #canvas-container {
-      flex: 1;
       width: 100%;
       max-width: 440px;
+      height: calc(100dvh - 36px - 172px);
+      flex-shrink: 0;
       overflow: hidden;
     }
 
+    /* Grid: fixed 172px, scrolls if rows overflow */
     #sound-grid {
       width: 100%;
       max-width: 440px;
-      padding: 6px 8px;
+      padding: 5px 8px 8px;
       display: flex;
       flex-wrap: wrap;
       gap: 5px;
-      justify-content: center;
-      flex-shrink: 0;
-      height: 152px;
+      align-content: flex-start;
+      height: 172px;
       overflow-y: auto;
+      flex-shrink: 0;
     }
+
     .sound-btn {
       background: #0f3460;
       color: #dde;
       border: 2px solid #1a4a80;
       border-radius: 7px;
-      padding: 6px 0;
-      width: calc(14.28% - 5px);
-      min-width: 44px;
-      font-size: 0.8rem;
+      padding: 5px 0;
+      /* 6 per row */
+      width: calc(16.66% - 5px);
+      min-width: 42px;
+      font-size: 0.78rem;
       font-family: inherit;
       cursor: pointer;
-      transition: background .1s, border-color .1s, transform .08s;
       touch-action: manipulation;
+      transition: background .1s, border-color .1s;
     }
-    .sound-btn:active { transform: scale(0.93); }
+    .sound-btn:active { opacity: 0.7; }
     .sound-btn.hit {
       background: #1a5c3a;
       border-color: #2ecc71;
@@ -103,7 +110,6 @@
   </div>
 
   <div id="canvas-container"></div>
-
   <div id="sound-grid"></div>
 
   <div id="game-over">
@@ -114,28 +120,26 @@
 
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
   <script>
+  // Russian alphabet order — buttons appear in this order
   const LETTERS = [
-    { letter: "А", sound: "a" },      { letter: "Б", sound: "b" },
-    { letter: "В", sound: "v" },      { letter: "Г", sound: "g" },
-    { letter: "Д", sound: "d" },      { letter: "Е", sound: "ye" },
-    { letter: "Ё", sound: "yo" },     { letter: "Ж", sound: "zh" },
-    { letter: "З", sound: "z" },      { letter: "И", sound: "ee" },
-    { letter: "Й", sound: "y" },      { letter: "К", sound: "k" },
-    { letter: "Л", sound: "l" },      { letter: "М", sound: "m" },
-    { letter: "Н", sound: "n" },      { letter: "О", sound: "o" },
-    { letter: "П", sound: "p" },      { letter: "Р", sound: "r" },
-    { letter: "С", sound: "s" },      { letter: "Т", sound: "t" },
-    { letter: "У", sound: "oo" },     { letter: "Ф", sound: "f" },
-    { letter: "Х", sound: "kh" },     { letter: "Ц", sound: "ts" },
-    { letter: "Ч", sound: "ch" },     { letter: "Ш", sound: "sh" },
-    { letter: "Щ", sound: "shch" },   { letter: "Ъ", sound: "ъ" },
-    { letter: "Ы", sound: "ih" },     { letter: "Ь", sound: "ь" },
-    { letter: "Э", sound: "e" },      { letter: "Ю", sound: "yu" },
+    { letter: "А", sound: "a" },    { letter: "Б", sound: "b" },
+    { letter: "В", sound: "v" },    { letter: "Г", sound: "g" },
+    { letter: "Д", sound: "d" },    { letter: "Е", sound: "ye" },
+    { letter: "Ё", sound: "yo" },   { letter: "Ж", sound: "zh" },
+    { letter: "З", sound: "z" },    { letter: "И", sound: "ee" },
+    { letter: "Й", sound: "y" },    { letter: "К", sound: "k" },
+    { letter: "Л", sound: "l" },    { letter: "М", sound: "m" },
+    { letter: "Н", sound: "n" },    { letter: "О", sound: "o" },
+    { letter: "П", sound: "p" },    { letter: "Р", sound: "r" },
+    { letter: "С", sound: "s" },    { letter: "Т", sound: "t" },
+    { letter: "У", sound: "oo" },   { letter: "Ф", sound: "f" },
+    { letter: "Х", sound: "kh" },   { letter: "Ц", sound: "ts" },
+    { letter: "Ч", sound: "ch" },   { letter: "Ш", sound: "sh" },
+    { letter: "Щ", sound: "shch" }, { letter: "Ъ", sound: "ъ" },
+    { letter: "Ы", sound: "ih" },   { letter: "Ь", sound: "ь" },
+    { letter: "Э", sound: "e" },    { letter: "Ю", sound: "yu" },
     { letter: "Я", sound: "ya" },
   ];
-
-  // Build sorted sound button list once
-  const ALL_SOUNDS = LETTERS.map(l => l.sound).sort();
 
   let fallingLetters = [];
   let score = 0;
@@ -144,9 +148,9 @@
   let frameCount = 0;
   let gameActive = true;
 
-  // Build sound buttons
+  // Build buttons in Russian alphabet order (no sort)
   const grid = document.getElementById('sound-grid');
-  ALL_SOUNDS.forEach(sound => {
+  LETTERS.forEach(({ sound }) => {
     const btn = document.createElement('button');
     btn.className = 'sound-btn';
     btn.textContent = sound;
@@ -156,17 +160,15 @@
 
   function handleTap(sound, btn) {
     if (!gameActive) return;
-    let hit = false;
-    // Find lowest matching letter
-    let lowestIdx = -1;
-    let lowestY = -Infinity;
+    let lowestIdx = -1, lowestY = -Infinity;
     for (let i = 0; i < fallingLetters.length; i++) {
       if (fallingLetters[i].sound === sound && fallingLetters[i].y > lowestY) {
         lowestY = fallingLetters[i].y;
         lowestIdx = i;
       }
     }
-    if (lowestIdx >= 0) {
+    const hit = lowestIdx >= 0;
+    if (hit) {
       fallingLetters[lowestIdx].flash = 20;
       const removed = fallingLetters[lowestIdx];
       setTimeout(() => {
@@ -175,10 +177,7 @@
       }, 200);
       score++;
       document.getElementById('score').textContent = score;
-      hit = true;
     }
-
-    // Flash button
     btn.classList.add(hit ? 'hit' : 'miss');
     setTimeout(() => btn.classList.remove('hit', 'miss'), 300);
   }
@@ -189,20 +188,18 @@
   function spawnLetter(p) {
     const data = LETTERS[Math.floor(Math.random() * LETTERS.length)];
     fallingLetters.push({
-      letter: data.letter,
-      sound: data.sound,
+      letter: data.letter, sound: data.sound,
       x: 32 + Math.random() * (p.width - 64),
-      y: -30,
-      speed: fallSpeed(),
-      flash: 0,
+      y: -30, speed: fallSpeed(), flash: 0,
     });
   }
 
   new p5(function(p) {
     p.setup = function() {
       const container = document.getElementById('canvas-container');
-      const rect = container.getBoundingClientRect();
-      const cnv = p.createCanvas(rect.width, Math.max(rect.height, 150));
+      const w = container.clientWidth || Math.min(window.innerWidth, 440);
+      const h = container.clientHeight || Math.max(150, window.innerHeight - 36 - 172);
+      const cnv = p.createCanvas(w, h);
       cnv.parent('canvas-container');
       p.textAlign(p.CENTER, p.CENTER);
       p.noStroke();
@@ -245,7 +242,7 @@
   function loseLife() {
     lives--;
     document.getElementById('lives').textContent =
-      '❤️'.repeat(lives) + '🖤'.repeat(3 - lives) || '💔';
+      '❤️'.repeat(Math.max(lives, 0)) + '🖤'.repeat(Math.max(3 - lives, 0)) || '💔';
     if (lives <= 0) endGame();
   }
 
@@ -264,11 +261,6 @@
     document.getElementById('level').textContent = 1;
     document.getElementById('game-over').classList.remove('show');
   }
-
-  // Keep keyboard support for desktop
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter') return;
-  });
   </script>
 </body>
 </html>
