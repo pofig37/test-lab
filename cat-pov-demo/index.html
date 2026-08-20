@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cat POV Demo</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #1a2e1a;
+    font-family: sans-serif;
+  }
+  canvas {
+    max-width: 100%;
+    display: block;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+</head>
+<body>
+<script>
+  const W = 500, H = 320;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#7bb8e8');
+
+  const camera = new THREE.PerspectiveCamera(70, W / H, 0.1, 100);
+  camera.position.set(0, 0.6, 0); // a cat's eye is low to the ground
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(W, H);
+  document.body.appendChild(renderer.domElement);
+
+  // real light + shadow — this is the depth cue a flat 2D scene can't give
+  const sun = new THREE.DirectionalLight(0xffffff, 1);
+  sun.position.set(3, 6, 2);
+  scene.add(sun);
+  scene.add(new THREE.AmbientLight(0x8899aa, 0.6));
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 200),
+    new THREE.MeshStandardMaterial({ color: '#3a6b3a' })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.z = -90;
+  scene.add(ground);
+
+  // trees on either side — real 3D means they pass by at different
+  // speeds depending how close they are, unlike a flat scrolling backdrop
+  const treeMat = new THREE.MeshStandardMaterial({ color: '#2d5a2d' });
+  const trunkMat = new THREE.MeshStandardMaterial({ color: '#5a3d24' });
+  const trees = [];
+  for (let i = 0; i < 16; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const tree = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1), trunkMat);
+    trunk.position.y = 0.5;
+    const top = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.6, 8), treeMat);
+    top.position.y = 1.6;
+    tree.add(trunk, top);
+    tree.position.set(side * (1.8 + Math.random() * 1.5), 0, -(i * 12 + 6));
+    scene.add(tree);
+    trees.push(tree);
+  }
+
+  // treasure — a gold box hidden behind a tree, only visible from the right angle
+  const treasure = new THREE.Mesh(
+    new THREE.BoxGeometry(0.4, 0.3, 0.4),
+    new THREE.MeshStandardMaterial({ color: '#e8c840' })
+  );
+  treasure.position.set(1.2, 0.15, -30);
+  scene.add(treasure);
+
+  let z = 0;
+  let t = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.01;
+    z -= 0.06; // walking forward
+    if (z < -180) z = 0; // loop back to the start
+
+    camera.position.z = z;
+    camera.rotation.y = Math.sin(t) * 0.35; // head turning side to side, looking around
+
+    renderer.render(scene, camera);
+  }
+  animate();
+</script>
+</body>
+</html>
