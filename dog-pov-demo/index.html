@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dog POV Demo</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #333;
+    font-family: sans-serif;
+  }
+  canvas {
+    max-width: 100%;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+</head>
+<body>
+<script>
+  const W = 500, H = 320;
+  const HORIZON = H * 0.45;
+  const FOCAL = 200; // how strongly things grow as they approach
+  let hurdleZ = 500;  // distance from the dog's eyes — far to near
+  let jumpBob = 0;
+
+  function setup() {
+    createCanvas(W, H);
+    noStroke();
+  }
+
+  function draw() {
+    push();
+    translate(0, jumpBob);
+
+    // sky and ground, split at the horizon
+    fill('#bfe3ff');
+    rect(0, 0, W, HORIZON);
+    fill('#7a5a35');
+    rect(0, HORIZON, W, H - HORIZON);
+
+    // ground stripes get closer together toward the horizon — the classic
+    // "receding path" perspective trick, same idea used to size the hurdle below
+    fill('#8a6d46');
+    for (let z = 40; z < 500; z += 40) {
+      const scale = FOCAL / z;
+      const stripeY = HORIZON + scale * 60;
+      rect(0, stripeY, W, 2);
+    }
+
+    // hurdle rushes toward the viewer as z shrinks
+    hurdleZ -= 4;
+    if (hurdleZ < 20) {
+      hurdleZ = 500;
+      jumpBob = 18; // the "jump" — camera dips down then springs back
+    }
+    const scale = FOCAL / hurdleZ;
+    const hurdleW = scale * 70;
+    const hurdleH = scale * 90;
+    const hurdleY = HORIZON + scale * 60 - hurdleH;
+    fill('#4a3826');
+    rect(W / 2 - hurdleW / 2, hurdleY, hurdleW, hurdleH);
+
+    pop();
+
+    // camera bob settles back to 0 — this is the "you just jumped it" feedback
+    jumpBob *= 0.9;
+  }
+</script>
+</body>
+</html>
