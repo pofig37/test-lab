@@ -64,9 +64,12 @@
       vy = -11;
     }
 
+    // running bob — a little sine-wave bounce while feet are on the ground
+    const bob = jumping ? 0 : sin(frameCount * 0.4) * 6;
+
     textSize(40);
     push();
-    translate(dogX, dogY);
+    translate(dogX, dogY + bob);
     scale(-1, 1); // the 🐕 glyph faces left by default; flip so it faces the hurdle
     text('🐕', 0, 0);
     pop();
