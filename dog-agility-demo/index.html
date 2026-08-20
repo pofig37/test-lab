@@ -65,7 +65,11 @@
     }
 
     textSize(40);
-    text('🐕', dogX, dogY);
+    push();
+    translate(dogX, dogY);
+    scale(-1, 1); // the 🐕 glyph faces left by default; flip so it faces the hurdle
+    text('🐕', 0, 0);
+    pop();
   }
 </script>
 </body>
