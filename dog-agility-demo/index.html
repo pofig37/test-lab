@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dog Agility Demo</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #d8c7a1;
+    font-family: sans-serif;
+  }
+  canvas {
+    max-width: 100%;
+    border-top: 0.5rem solid #8a6d46;
+    border-bottom: 0.5rem solid #8a6d46;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+</head>
+<body>
+<script>
+  const GROUND_Y = 220;
+  let dogX = 60;
+  let dogY = GROUND_Y;
+  let vy = 0;
+  let jumping = false;
+  let hurdleX = 400;
+
+  function setup() {
+    createCanvas(500, 260);
+  }
+
+  function draw() {
+    background('#e3d3ab');
+    fill('#8a6d46');
+    rect(0, GROUND_Y + 30, width, 10);
+
+    // hurdle scrolls toward the dog, loops back around
+    hurdleX -= 3;
+    if (hurdleX < -20) hurdleX = width + 20;
+    fill('#4a3826');
+    rect(hurdleX, GROUND_Y - 10, 8, 40);
+
+    // jump arc — real physics, not a hand-timed CSS animation
+    if (jumping) {
+      vy += 0.6;
+      dogY += vy;
+      if (dogY >= GROUND_Y) {
+        dogY = GROUND_Y;
+        vy = 0;
+        jumping = false;
+      }
+    }
+
+    // auto-jump when the hurdle gets close
+    if (!jumping && hurdleX > dogX && hurdleX < dogX + 60) {
+      jumping = true;
+      vy = -11;
+    }
+
+    textSize(40);
+    text('🐕', dogX, dogY);
+  }
+</script>
+</body>
+</html>
